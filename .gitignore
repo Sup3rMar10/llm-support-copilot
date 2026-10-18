@@ -5,3 +5,4 @@ __pycache__/
 webhook_audit.jsonl
 *.jsonl
 traces/
+eval_results/ci/

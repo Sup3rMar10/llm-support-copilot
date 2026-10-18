@@ -212,11 +212,16 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, {**box["r"], "request_id": self.rid})
 
 
+class _HTTPServer(ThreadingHTTPServer):
+    # stdlib default is 5: with 32 concurrent clients on Windows, dropped SYNs were retried after ~1 s (p95 jumped to 1 s)
+    request_queue_size = 128
+
+
 class CopilotServer:
     def __init__(self, app: CopilotApp, host: str = "127.0.0.1", port: int = 0):
         handler = type("BoundHandler", (Handler,), {"app": app})
         self.app = app
-        self.httpd = ThreadingHTTPServer((host, port), handler)
+        self.httpd = _HTTPServer((host, port), handler)
         self.httpd.daemon_threads = False  # server_close() joins in-flight requests (graceful drain)
         self._thread: threading.Thread | None = None
 

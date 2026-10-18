@@ -45,3 +45,11 @@ def server_factory():
             s.shutdown()
         except Exception:
             pass
+
+
+@pytest.fixture(scope="session")
+def eval_runs():
+    """Every variant run once over the full golden set (deterministic, ~10 s); shared by the eval tests."""
+    from copilot_eval.report import run_all
+
+    return run_all("all")

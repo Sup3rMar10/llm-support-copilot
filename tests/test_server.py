@@ -189,3 +189,10 @@ def test_graceful_shutdown_drains_in_flight_request_then_closes_port(server_fact
     assert res["r"][0] == 200
     with pytest.raises(urllib.error.URLError):
         urllib.request.urlopen(srv.url + "/healthz", timeout=2)
+
+
+def test_listen_backlog_is_large_enough_for_concurrent_clients(server_factory):
+    # regression: the stdlib default backlog of 5 made 32 concurrent clients wait ~1 s for a SYN retry on Windows
+    from copilot.server import Settings
+    srv = server_factory(settings=Settings(auth_token=None, trace_dir=None))
+    assert srv.httpd.request_queue_size >= 64
